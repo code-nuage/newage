@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lexer.h"
+#include "parser.h"
 
 #define BLOCK_SIZE 24
 #define BLOCK_COUNT 10
@@ -35,20 +35,8 @@ char *read_file(const char *filename) {
 int main(int argc, char** argv) {
     char* content = read_file("test.na");
 
-    Lexer l = {.input = content, .pos = 0};
-    Token tokens[50];
-
-    int i = 0;
-    Token t;
-
-    do {
-        t = next_token(&l);
-        print_token(t);
-
-        tokens[i] = t;
-
-        i++;
-    } while (t.type != TOKEN_EOF);
+    ASTProgram *ast = parse_program(content);
+    print_program(ast);
 
     return 0;
 }

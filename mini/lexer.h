@@ -1,4 +1,8 @@
-#ifndef lexer
+#ifndef LEXER_H
+#define LEXER_H
+
+// --+ Lexer +--
+// State
 typedef struct {
     const char *input;
     int pos;
@@ -6,6 +10,7 @@ typedef struct {
     int column;
 } Lexer;
 
+// --+ Tokens +--
 typedef enum {
     TOKEN_IDENT,
     TOKEN_NUMBER,
@@ -33,13 +38,16 @@ typedef struct {
     int value;
 } Token;
 
-char current(Lexer *l);
-char advance(Lexer *l);
-char skip_whitespace(Lexer *l);
+char lex_current(Lexer *l);
+void lex_advance(Lexer *l);
+void lex_skip_whitespace(Lexer *l);
 Token lex_number(Lexer *l);
 Token lex_ident(Lexer *l);
-Token next_token(Lexer *l);
 
+char* display_token(Token t);
 void print_token(Token t);
+
+Token next_token(Lexer *l);
+Token* lex_tokens(char* content, int size);
 
 #endif // lexer

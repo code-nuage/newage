@@ -41,26 +41,28 @@ typedef struct {
     int value;
 } Token;
 
-char current(Lexer *l) {
+// --+ Utils +--
+char lex_current(Lexer *l) {
     return l->input[l->pos];
 }
 
-void advance(Lexer *l) {
+void lex_advance(Lexer *l) {
     if (l->input[l->pos] != '\0') 
         l->pos++;
 }
 
-void skip_whitespace(Lexer *l) {
-    while (current(l) == ' ' || current(l) == '\t' || current(l) == '\r')
-        advance(l);
+void lex_skip_whitespace(Lexer *l) {
+    while (lex_current(l) == ' ' || lex_current(l) == '\t' || lex_current(l) == '\r')
+        lex_advance(l);
 }
 
+// --+ Manipulation +--
 Token lex_number(Lexer *l) {
     int value = 0;
 
-    while (isdigit(current(l))) {
-        value = value * 10 + (current(l) - '0');
-        advance(l);
+    while (isdigit(lex_current(l))) {
+        value = value * 10 + (lex_current(l) - '0');
+        lex_advance(l);
     }
 
     Token t;
@@ -73,9 +75,9 @@ Token lex_ident(Lexer *l) {
     char buffer[64];
     int i = 0;
 
-    while (isalnum(current(l))) {
-        buffer[i++] = current(l);
-        advance(l);
+    while (isalnum(lex_current(l))) {
+        buffer[i++] = lex_current(l);
+        lex_advance(l);
     }
 
     buffer[i] = 0;
@@ -92,10 +94,50 @@ Token lex_ident(Lexer *l) {
     return t;
 }
 
-Token next_token(Lexer *l) {
-    skip_whitespace(l);
+// --+ Utils +--
+char* display_token(Token t) {
+    switch (t.type) {
+        case TOKEN_IDENT:
+            return "IDENT";
+        case TOKEN_NUMBER:
+            return "NUMBER";
+        case TOKEN_PRINT:
+            return "PRINT";
+        case TOKEN_PLUS:
+            return "PLUS";
+        case TOKEN_MINUS:
+            return "MINUS";
+        case TOKEN_STAR:
+            return "STAR";
+        case TOKEN_SLASH:
+            return "SLASH";
+        case TOKEN_EQUAL:
+            return "EQUAL";
 
-    char c = current(l);
+        case TOKEN_LPAREN:
+            return "LPAREN";
+        case TOKEN_RPAREN:
+            return "RPAREN";
+
+        case TOKEN_RETURN:
+            return "RETURN";
+        case TOKEN_EOF:
+            return "EOF";
+
+        default:
+            return "TOKEN";
+    }
+}
+
+void print_token(Token t) {
+    printf("%s\n", display_token(t));
+}
+
+// --+ Processing +--
+Token next_token(Lexer *l) {
+    lex_skip_whitespace(l);
+
+    char c = lex_current(l);
 
     if (isdigit(c))
         return lex_number(l);
@@ -106,17 +148,17 @@ Token next_token(Lexer *l) {
     Token t = {0};
 
     switch (c) {
-        case('+'): advance(l); t.type = TOKEN_PLUS;   return t;
-        case('-'): advance(l); t.type = TOKEN_MINUS;  return t;
-        case('*'): advance(l); t.type = TOKEN_STAR;   return t;
-        case('/'): advance(l); t.type = TOKEN_SLASH;  return t;
-        case('%'): advance(l); t.type = TOKEN_PERCEN; return t;
-        case('='): advance(l); t.type = TOKEN_EQUAL;  return t;
+        case('+'): lex_advance(l); t.type = TOKEN_PLUS;   return t;
+        case('-'): lex_advance(l); t.type = TOKEN_MINUS;  return t;
+        case('*'): lex_advance(l); t.type = TOKEN_STAR;   return t;
+        case('/'): lex_advance(l); t.type = TOKEN_SLASH;  return t;
+        case('%'): lex_advance(l); t.type = TOKEN_PERCEN; return t;
+        case('='): lex_advance(l); t.type = TOKEN_EQUAL;  return t;
 
-        case('('): advance(l); t.type = TOKEN_LPAREN; return t;
-        case(')'): advance(l); t.type = TOKEN_RPAREN; return t;
+        case('('): lex_advance(l); t.type = TOKEN_LPAREN; return t;
+        case(')'): lex_advance(l); t.type = TOKEN_RPAREN; return t;
 
-        case('\n'): advance(l); t.type = TOKEN_RETURN; return t;
+        case('\n'): lex_advance(l); t.type = TOKEN_RETURN; return t;
         case('\0'): t.type = TOKEN_EOF;                return t;
     }
 
@@ -124,48 +166,21 @@ Token next_token(Lexer *l) {
     exit(1);
 }
 
-void print_token(Token t) {
-    switch (t.type) {
-        case TOKEN_IDENT:
-            printf("IDENT(%s)\n", t.text);
-            break;
-        case TOKEN_NUMBER:
-            printf("NUMBER(%d)\n", t.value);
-            break;
-        case TOKEN_PRINT:
-            printf("PRINT\n");
-            break;
-        case TOKEN_PLUS:
-            printf("PLUS\n");
-            break;
-        case TOKEN_MINUS:
-            printf("MINUS\n");
-            break;
-        case TOKEN_STAR:
-            printf("STAR\n");
-            break;
-        case TOKEN_SLASH:
-            printf("SLASH\n");
-            break;
-        case TOKEN_EQUAL:
-            printf("EQUAL\n");
-            break;
+Token* lex_tokens(char* content, int size) {
+    Lexer l = {.input = content, .pos = 0};
+    Token* tokens = malloc(sizeof(Token) * size);
 
-        case TOKEN_LPAREN:
-            printf("LPAREN\n");
-            break;
-        case TOKEN_RPAREN:
-            printf("RPAREN\n");
-            break;
+    int i = 0;
+    Token t;
 
-        case TOKEN_RETURN:
-            printf("RETURN\n");
-            break;
-        case TOKEN_EOF:
-            printf("EOF\n");
-            break;
+    do {
+        t = next_token(&l);
+        print_token(t);
 
-        default:
-            printf("TOKEN\n");
-    }
+        tokens[i] = t;
+
+        i++;
+    } while (t.type != TOKEN_EOF);
+
+    return tokens;
 }
