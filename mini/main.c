@@ -39,16 +39,16 @@ int main(int argc, char** argv) {
     Token tokens[50];
 
     int i = 0;
+    Token t;
 
-    while (1) {
-        tokens[i] = next_token(&l);
-        print_token(tokens[i]);
+    do {
+        t = next_token(&l);
+        print_token(t);
 
-        if (tokens[i].type == TOKEN_EOF)
-            break;
+        tokens[i] = t;
 
         i++;
-    }
+    } while (t.type != TOKEN_EOF);
 
     return 0;
 }

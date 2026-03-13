@@ -1,4 +1,10 @@
-#ifndef lexer 
+#ifndef lexer
+typedef struct {
+    const char *input;
+    int pos;
+    int line;
+    int column;
+} Lexer;
 
 typedef enum {
     TOKEN_IDENT,
@@ -9,24 +15,23 @@ typedef enum {
     TOKEN_MINUS,
     TOKEN_STAR,
     TOKEN_SLASH,
+    TOKEN_PERCEN,
 
     TOKEN_EQUAL,
 
     TOKEN_LPAREN,
     TOKEN_RPAREN,
 
+    TOKEN_RETURN,
     TOKEN_EOF
 } TokenType;
+
 typedef struct {
     TokenType type;
 
     char text[64];
     int value;
 } Token;
-typedef struct {
-    const char *input;
-    int pos;
-} Lexer;
 
 char current(Lexer *l);
 char advance(Lexer *l);

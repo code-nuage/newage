@@ -3,6 +3,15 @@
 #include <ctype.h>
 #include <string.h>
 
+// --+ Lexer +--
+// State
+typedef struct {
+    const char *input;
+    int pos;
+    int line;
+    int column;
+} Lexer;
+
 // --+ Tokens +--
 typedef enum {
     TOKEN_IDENT,
@@ -13,12 +22,14 @@ typedef enum {
     TOKEN_MINUS,
     TOKEN_STAR,
     TOKEN_SLASH,
+    TOKEN_PERCEN,
 
     TOKEN_EQUAL,
 
     TOKEN_LPAREN,
     TOKEN_RPAREN,
 
+    TOKEN_RETURN,
     TOKEN_EOF
 } TokenType;
 
@@ -30,23 +41,17 @@ typedef struct {
     int value;
 } Token;
 
-// --+ Lexer +--
-// State
-typedef struct {
-    const char *input;
-    int pos;
-} Lexer;
-
 char current(Lexer *l) {
     return l->input[l->pos];
 }
 
 void advance(Lexer *l) {
-    l->pos++;
+    if (l->input[l->pos] != '\0') 
+        l->pos++;
 }
 
 void skip_whitespace(Lexer *l) {
-    while (isspace(current(l)))
+    while (current(l) == ' ' || current(l) == '\t' || current(l) == '\r')
         advance(l);
 }
 
@@ -75,7 +80,7 @@ Token lex_ident(Lexer *l) {
 
     buffer[i] = 0;
 
-    Token t;
+    Token t = {0};
 
     if (strcmp(buffer, "print") == 0) {
         t.type = TOKEN_PRINT;
@@ -98,19 +103,21 @@ Token next_token(Lexer *l) {
     if (isalpha(c))
         return lex_ident(l);
 
-    Token t;
+    Token t = {0};
 
     switch (c) {
-        case('+'): advance(l); t.type = TOKEN_PLUS;  return t;
-        case('-'): advance(l); t.type = TOKEN_MINUS; return t;
-        case('*'): advance(l); t.type = TOKEN_STAR;  return t;
-        case('/'): advance(l); t.type = TOKEN_SLASH; return t;
-        case('='): advance(l); t.type = TOKEN_EQUAL; return t;
+        case('+'): advance(l); t.type = TOKEN_PLUS;   return t;
+        case('-'): advance(l); t.type = TOKEN_MINUS;  return t;
+        case('*'): advance(l); t.type = TOKEN_STAR;   return t;
+        case('/'): advance(l); t.type = TOKEN_SLASH;  return t;
+        case('%'): advance(l); t.type = TOKEN_PERCEN; return t;
+        case('='): advance(l); t.type = TOKEN_EQUAL;  return t;
 
         case('('): advance(l); t.type = TOKEN_LPAREN; return t;
         case(')'): advance(l); t.type = TOKEN_RPAREN; return t;
 
-        case('\0'): t.type = TOKEN_EOF; return t;
+        case('\n'): advance(l); t.type = TOKEN_RETURN; return t;
+        case('\0'): t.type = TOKEN_EOF;                return t;
     }
 
     printf("Unkown character: %c\n", c);
@@ -151,6 +158,9 @@ void print_token(Token t) {
             printf("RPAREN\n");
             break;
 
+        case TOKEN_RETURN:
+            printf("RETURN\n");
+            break;
         case TOKEN_EOF:
             printf("EOF\n");
             break;

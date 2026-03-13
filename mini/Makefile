@@ -3,8 +3,8 @@ CC = gcc
 CFLAGS = -Wall
 
 # Fichiers
-SRCS = main.c lexer.c
-TARGET = main
+SRCS = main.c lexer.c parser.c
+TARGET = newage
 
 # Règles
 all: $(TARGET)
