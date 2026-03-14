@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser.h"
+#include "parser/parser.h"
+#include "ast/ast.h"
 
 #define BLOCK_SIZE 24
 #define BLOCK_COUNT 10
@@ -35,8 +36,8 @@ char *read_file(const char *filename) {
 int main(int argc, char** argv) {
     char* content = read_file("test.na");
 
-    ASTProgram *ast = parse_program(content);
-    print_program(ast);
+    ASTProgram *ast = p_program(content);
+    a_print_program(ast);
 
     return 0;
 }

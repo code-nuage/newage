@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall
 
 # Fichiers
-SRCS = main.c lexer.c parser.c
+SRCS = main.c lexer/lexer.c token/token.c parser/parser.c ast/ast.c
 TARGET = newage
 
 # Règles
