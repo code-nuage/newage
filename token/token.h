@@ -58,9 +58,12 @@ typedef enum TokenType {
     TOKEN_STRING_TYPE, // string
     TOKEN_TABLE_TYPE,  // table
 
+    TOKEN_TRUE,        // true
+    TOKEN_FALSE,       // false
+
     // Other
-    TOKEN_D_EOF, // \0
-    TOKEN_D_EOL, // \n
+    TOKEN_EOF, // \0
+    TOKEN_EOL, // \n
 } TokenType;
 
 typedef struct Token {
