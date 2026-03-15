@@ -30,4 +30,4 @@ typedef struct {
 char* t_display(Token t);
 void t_print(Token t);
 
-#endif
+#endif // TOKEN_H

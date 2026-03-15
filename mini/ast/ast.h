@@ -6,7 +6,7 @@
 typedef enum {
     AST_NUMBER,
     AST_BINARY,
-    AST_PRINT
+    AST_EXPR
 } ASTType;
 
 typedef struct AST AST;
@@ -24,8 +24,8 @@ struct AST {
         } binary;
 
         struct {
-            AST *expr;
-        } print;
+            AST *text;
+        } expr;
     };
 };
 

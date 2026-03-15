@@ -2,14 +2,16 @@
 
 #include <stdio.h>
 
-char* t_display(Token t) {
+char *t_display(Token t) {
+    static char type[100];
+
     switch (t.type) {
         case TOKEN_IDENT:
-            return "IDENT";
+            snprintf(type, sizeof(type), "IDENT(%s)", t.text);
+            return type;
         case TOKEN_NUMBER:
-            return "NUMBER";
-        case TOKEN_PRINT:
-            return "PRINT";
+            snprintf(type, sizeof(type), "NUMBER(%d)", t.value);
+            return type;
         case TOKEN_PLUS:
             return "PLUS";
         case TOKEN_MINUS:

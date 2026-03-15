@@ -48,12 +48,8 @@ Token l_ident(Lexer *l) {
 
     Token t = {0};
 
-    if (strcmp(buffer, "print") == 0) {
-        t.type = TOKEN_PRINT;
-    } else {
-        t.type = TOKEN_IDENT;
-        strcpy(t.text, buffer);
-    }
+    t.type = TOKEN_IDENT;
+    strcpy(t.text, buffer);
 
     return t;
 }

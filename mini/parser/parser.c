@@ -14,24 +14,36 @@ void p_advance(Parser* p) {
         p->pos++;
 }
 
-AST *p_factor(Parser *p) {
-    Token t = p_current(p);
+int infix_binding_power(TokenType type, int *left, int *right) {
+    switch (type) {
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+            *left = 10;
+            *right = 11;
+            return 1;
+        case TOKEN_STAR:
+        case TOKEN_SLASH:
+            *left = 20;
+            *right = 21;
+            return 1;
+        
+        default:
+            return 0;
+    }
+}
 
+AST *nud(Parser *p, Token t) {
     if (t.type == TOKEN_NUMBER) {
-        p_advance(p);
-
         AST *node = malloc(sizeof(AST));
         node->type = AST_NUMBER;
         node->number = t.value;
-
         return node;
-    };
+    }
 
     if (t.type == TOKEN_LPAREN) {
-        p_advance(p);
 
-        AST *expr = p_expression(p);
-        
+        AST *expr = p_expression(p, 0);
+
         if (p_current(p).type != TOKEN_RPAREN) {
             printf("Expected )\n");
             exit(1);
@@ -39,48 +51,39 @@ AST *p_factor(Parser *p) {
 
         p_advance(p);
         return expr;
-    };
+    }
 
     printf("Unexpected token\n");
     exit(1);
 }
 
-AST *p_term(Parser *p) {
-    AST *left = p_factor(p);
-    
-    while(p_current(p).type == TOKEN_STAR || p_current(p).type == TOKEN_SLASH) {
-        TokenType operator = p_current(p).type;
+AST *p_expression(Parser *p, int min_bp) {
+    Token t = p_current(p);
+    p_advance(p);
+
+    AST *left = nud(p, t);
+
+    while (1) {
+        Token op = p_current(p);
+
+        int left_bp, right_bp;
+
+        if (!infix_binding_power(op.type, &left_bp, &right_bp))
+            break;
+
+        if (left_bp < min_bp)
+            break;
+
         p_advance(p);
 
-        AST *right = p_factor(p);
-        AST *node = malloc(sizeof(AST));
-        node->type = AST_BINARY;
-        node->binary.left = left;
-        node->binary.right = right;
-        node->binary.operator = operator;
-
-        left = node;
-    }
-
-    return left;
-}
-
-AST *p_expression(Parser *p) {
-    AST *left = p_term(p);
-
-    while (p_current(p).type == TOKEN_PLUS ||
-           p_current(p).type == TOKEN_MINUS) {
-
-        TokenType operator = p_current(p).type;
-        p_advance(p);
-
-        AST *right = p_term(p);
+        AST *right = p_expression(p, right_bp);
 
         AST *node = malloc(sizeof(AST));
         node->type = AST_BINARY;
+
         node->binary.left = left;
         node->binary.right = right;
-        node->binary.operator = operator;
+        node->binary.operator = op.type;
 
         left = node;
     }
@@ -91,10 +94,10 @@ AST *p_expression(Parser *p) {
 AST *p_statement(Parser *p) {
     Token t = p_current(p);
 
-    if (t.type == TOKEN_PRINT) {
+    if (t.type == TOKEN_IDENT) {
         p_advance(p);
 
-        AST *expr = p_expression(p);
+        AST *expr = p_expression(p, 0);
 
         if (p_current(p).type != TOKEN_RETURN) {
             printf("Expected newline\n");
@@ -103,9 +106,9 @@ AST *p_statement(Parser *p) {
 
         p_advance(p);
 
-        AST *node = malloc(sizeof *node);
-        node->type = AST_PRINT;
-        node->print.expr = expr;
+        AST *node = malloc(sizeof(AST));
+        node->type = AST_EXPR;
+        node->expr.text = expr;
 
         return node;
     }
@@ -127,6 +130,7 @@ ASTProgram *p_program(char *content) {
     program->count = 0;
 
     while (p_current(&p).type != TOKEN_EOF) {
+
         AST *stmt = p_statement(&p);
         program->statements[program->count++] = stmt;
     }

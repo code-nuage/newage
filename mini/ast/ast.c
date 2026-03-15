@@ -25,9 +25,9 @@ void a_print(AST *node, int indent) {
             a_print(node->binary.right, indent + 1);
             break;
 
-        case AST_PRINT:
+        case AST_EXPR:
             printf("Print:\n");
-            a_print(node->print.expr, indent + 1);
+            a_print(node->expr.text, indent + 1);
             break;
 
         default:
