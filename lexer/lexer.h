@@ -17,11 +17,12 @@ void lexer_advance(Lexer *l);
 void lexer_skip(Lexer *l);
 
 // Lexer
-Token lexer_keyword(Lexer *l);
-Token lexer_string(Lexer *l);
 Token lexer_number(Lexer *l);
+Token lexer_string(Lexer *l);
 Token lexer_operator(Lexer *l);
-Token lexer_ident(Lexer *l);
+Token lexer_ident_keyword(Lexer *l);
+
 Token lexer_next(Lexer *l);
+Token *lexer_tokens(char *content);
 
 #endif

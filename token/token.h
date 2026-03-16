@@ -3,67 +3,67 @@
 
 typedef enum TokenType {
     // Literals
-    TOKEN_IDENT,
-    TOKEN_STRING,
-    TOKEN_NUMBER,
+    T_IDENT,
+    T_STRING,
+    T_NUMBER,
 
     // Delimiters
-    TOKEN_LPAREN, // (
-    TOKEN_RPAREN, // )
-    TOKEN_LBRACE, // {
-    TOKEN_RBRACE, // }
-    TOKEN_LBRACK, // [
-    TOKEN_RBRACK, // ]
+    T_LPAREN, // (
+    T_RPAREN, // )
+    T_LBRACE, // {
+    T_RBRACE, // }
+    T_LBRACK, // [
+    T_RBRACK, // ]
 
-    TOKEN_DOT,    // .
-    TOKEN_COMMA,  // ,
-    TOKEN_COLON,  // :
+    T_DOT,    // .
+    T_COMMA,  // ,
+    T_COLON,  // :
 
     // Operators
-    TOKEN_PLUS,          // +
-    TOKEN_MINUS,         // -
-    TOKEN_MULTIPLY,      // *
-    TOKEN_DIVIDE,        // /
-    TOKEN_MOD,           // %
-    TOKEN_ASSIGN,        // =
+    T_PLUS,          // +
+    T_MINUS,         // -
+    T_MULTIPLY,      // *
+    T_DIVIDE,        // /
+    T_MOD,           // %
+    T_ASSIGN,        // =
     
-    TOKEN_EQUAL,         // ==
-    TOKEN_NOT_EQUAL,     // !=
-    TOKEN_GREATER,       // >
-    TOKEN_GREATER_EQUAL, // >=
-    TOKEN_LESS,          // <
-    TOKEN_LESS_EQUAL,    // <=
+    T_EQUAL,         // ==
+    T_NOT_EQUAL,     // !=
+    T_GREATER,       // >
+    T_GREATER_EQUAL, // >=
+    T_LESS,          // <
+    T_LESS_EQUAL,    // <=
 
-    TOKEN_AND,           // &&
-    TOKEN_OR,            // ||
-    TOKEN_NOT,           // !
+    T_AND,           // &&
+    T_OR,            // ||
+    T_NOT,           // !
 
     // Keywords
-    TOKEN_LOCAL,       // local
-    TOKEN_GLOBAL,      // global
+    T_LOCAL,       // local
+    T_GLOBAL,      // global
 
-    TOKEN_IF,          // if
-    TOKEN_ELSE,        // else
-    TOKEN_FOR,         // for
-    TOKEN_WHILE,       // while
-    TOKEN_DO,          // do
-    TOKEN_FUNC,        // function
-    TOKEN_RETURN,      // return
-    TOKEN_BREAK,       // break
-    TOKEN_CONTINUE,    // continue
+    T_IF,          // if
+    T_ELSE,        // else
+    T_FOR,         // for
+    T_WHILE,       // while
+    T_DO,          // do
+    T_FUNC,        // function
+    T_RETURN,      // return
+    T_BREAK,       // break
+    T_CONTINUE,    // continue
 
-    TOKEN_BOOL_TYPE,   // bool
-    TOKEN_INT_TYPE,    // int
-    TOKEN_FLOAT_TYPE,  // float
-    TOKEN_STRING_TYPE, // string
-    TOKEN_TABLE_TYPE,  // table
+    T_BOOL_TYPE,   // bool
+    T_INT_TYPE,    // int
+    T_FLOAT_TYPE,  // float
+    T_STRING_TYPE, // string
+    T_TABLE_TYPE,  // table
 
-    TOKEN_TRUE,        // true
-    TOKEN_FALSE,       // false
+    T_TRUE,        // true
+    T_FALSE,       // false
 
     // Other
-    TOKEN_EOF, // \0
-    TOKEN_EOL, // \n
+    T_EOF, // \0
+    T_EOL, // \n
 } TokenType;
 
 typedef struct Token {
@@ -78,5 +78,8 @@ typedef struct Token {
         double number;
     } value;
 } Token;
+
+char *token_display(Token t);
+void token_print(Token t);
 
 #endif
