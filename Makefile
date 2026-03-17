@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -Wextra
 
 SRCS = main.c lexer/lexer.c token/token.c
 TARGET = newage

@@ -87,6 +87,39 @@ Token lexer_number(Lexer *l) {
     return t;
 }
 
+Token lexer_string(Lexer *l) {
+    lexer_advance(l); // skip "
+
+    int start = l->pos;
+    int line = l->line;
+    int column = l->column;
+
+    while (lexer_current(l) != '"' && lexer_current(l) != '\0') {
+        lexer_advance(l);
+    }
+
+    if (lexer_current(l) == '\0') {
+        printf("Unterminated string at (%d, %d)\n", line, column);
+        exit(1);
+    }
+
+    int len = l->pos - start;
+    const char *buffer = l->content + start;
+
+    char *text = strndup(buffer, len);
+    text[len] = '\0';
+
+    lexer_advance(l); // skip "
+
+    Token t = {
+        .type = T_STRING,
+        .line = line, .column = column,
+        .value.string = text
+    };
+
+    return t;
+}
+
 Token lexer_ident_keyword(Lexer *l) {
     int start = l->pos;
     int line = l->line;
@@ -135,6 +168,9 @@ Token lexer_next(Lexer *l) {
     if (isalpha(c) || c == '_')
         return lexer_ident_keyword(l);
 
+    if (c == '"')
+        return lexer_string(l);
+
     Token t = {0};
 
     switch (c) {
@@ -150,6 +186,9 @@ Token lexer_next(Lexer *l) {
         case('}'): lexer_advance(l); t.type = T_RBRACE; return t;
         case('['): lexer_advance(l); t.type = T_LBRACK; return t;
         case(']'): lexer_advance(l); t.type = T_RBRACK; return t;
+        case(':'): lexer_advance(l); t.type = T_COLON;  return t;
+        case(','): lexer_advance(l); t.type = T_COMMA;  return t;
+        case('.'): lexer_advance(l); t.type = T_DOT;    return t;
 
         case('\n'): lexer_advance(l); t.type = T_EOL; return t;
         case('\0'): t.type = T_EOF;                   return t;
