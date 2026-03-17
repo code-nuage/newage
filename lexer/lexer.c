@@ -1,6 +1,7 @@
 #include "lexer.h"
 
 #include <ctype.h>
+#include <endian.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +36,10 @@ static const KeywordMap keywords[] = { // Map the TokenTypes to its strings
 // Utils
 char lexer_current(Lexer *l) {
     return l->content[l->pos];
+}
+
+char lexer_next(Lexer *l) {
+    return l->content[l->pos + 1];
 }
 
 void lexer_advance(Lexer *l) {
@@ -146,7 +151,6 @@ Token lexer_ident_keyword(Lexer *l) {
 
     char *text = malloc(len + 1);
     memcpy(text, buffer, len);
-    text[len] = '\0';
 
     Token t = {
         .type = T_IDENT,
@@ -157,7 +161,79 @@ Token lexer_ident_keyword(Lexer *l) {
     return t;
 }
 
-Token lexer_next(Lexer *l) {
+Token lexer_operator(Lexer *l, char first) {
+    int line = l->line;
+    int column = l->column;
+    Token t = {.line = line, .column = column};
+
+    switch (first) {
+        case '=':
+            if (lexer_next(l) == '=') {
+                t.type = T_EQUAL;
+                lexer_advance(l);
+            } else {
+                t.type = T_ASSIGN;
+            }
+            break;
+
+        case '>':
+            if (lexer_next(l) == '=') {
+                t.type = T_GREATER_EQUAL;
+                lexer_advance(l);
+            } else {
+                t.type = T_GREATER;
+            }
+            break;
+
+        case '<':
+            if (lexer_next(l) == '=') {
+                t.type = T_LESS_EQUAL;
+                lexer_advance(l);
+            } else {
+                t.type = T_LESS;
+            }
+            break;
+
+        case '!':
+            if (lexer_next(l) == '=') {
+                t.type = T_NOT_EQUAL;
+                lexer_advance(l);
+            } else {
+                t.type = T_NOT;
+            }
+            break;
+
+        case '&':
+            if (lexer_next(l) == '&') {
+                t.type = T_AND;
+                lexer_advance(l);
+            } else {
+                printf("Malformed AND operator: (%d, %d)\n", line, column);
+                exit(1);
+            }
+            break;
+
+        case '|':
+            if (lexer_next(l) == '|') {
+                t.type = T_OR;
+                lexer_advance(l);
+            } else {
+                printf("Malformed OR operator: (%d, %d)\n", line, column);
+                exit(1);
+            }
+            break;
+
+        default:
+            printf("Unknown operator at (%d, %d)", line, column);
+            exit(1);
+    }
+
+    lexer_advance(l);
+
+    return t;
+}
+
+Token lexer_next_token(Lexer *l) {
     lexer_skip(l);
 
     char c = lexer_current(l);
@@ -168,17 +244,22 @@ Token lexer_next(Lexer *l) {
     if (isalpha(c) || c == '_')
         return lexer_ident_keyword(l);
 
-    if (c == '"')
-        return lexer_string(l);
-
     Token t = {0};
 
     switch (c) {
+        case('"'): return lexer_string(l);
+
+        case('='): return lexer_operator(l, '=');
+        case('!'): return lexer_operator(l, '!');
+        case('>'): return lexer_operator(l, '>');
+        case('<'): return lexer_operator(l, '<');
+        case('&'): return lexer_operator(l, '&');
+        case('|'): return lexer_operator(l, '|');
+
         case('+'): lexer_advance(l); t.type = T_PLUS;     return t;
         case('-'): lexer_advance(l); t.type = T_MINUS;    return t;
         case('*'): lexer_advance(l); t.type = T_MULTIPLY; return t;
         case('/'): lexer_advance(l); t.type = T_DIVIDE;   return t;
-        case('='): lexer_advance(l); t.type = T_ASSIGN;   return t;
 
         case('('): lexer_advance(l); t.type = T_LPAREN; return t;
         case(')'): lexer_advance(l); t.type = T_RPAREN; return t;
@@ -208,7 +289,7 @@ Token* lexer_tokens(char* content) {
     Token t = {0};
 
     do {
-        t = lexer_next(&l);
+        t = lexer_next_token(&l);
         token_print(t);
 
         if (i >= tokens_capacity) {
